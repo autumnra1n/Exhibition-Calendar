@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet author="Михаил (generated)" id="1525470651367-1">
+        <createTable tableName="exposition">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="theme" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dateStart" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="startTime" type="time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="showroom_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-2">
+        <createTable tableName="payment">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ticket_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-3">
+        <createTable tableName="role">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-4">
+        <createTable tableName="showroom">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="location" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(1000)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-5">
+        <createTable tableName="ticket">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="description" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exposition_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-6">
+        <createTable tableName="user">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="login" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="firstName" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lastName" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-7">
+        <addUniqueConstraint columnNames="ticket_id" constraintName="ticket_unique" tableName="payment"/>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-8">
+        <createIndex indexName="FK_exposition_id" tableName="ticket">
+            <column name="exposition_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-9">
+        <createIndex indexName="FK_role_id" tableName="user">
+            <column name="role_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-10">
+        <createIndex indexName="FK_showroom_identifier" tableName="exposition">
+            <column name="showroom_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-11">
+        <createIndex indexName="FK_user_id" tableName="payment">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-12">
+        <addForeignKeyConstraint baseColumnNames="exposition_id" baseTableName="ticket" constraintName="FK_exposition_id" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="exposition"/>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-13">
+        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="user" constraintName="FK_role_id" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="role"/>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-14">
+        <addForeignKeyConstraint baseColumnNames="showroom_id" baseTableName="exposition" constraintName="FK_showroom_identifier" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="showroom"/>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-15">
+        <addForeignKeyConstraint baseColumnNames="ticket_id" baseTableName="payment" constraintName="FK_ticket_id" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="ticket"/>
+    </changeSet>
+    <changeSet author="Михаил (generated)" id="1525470651367-16">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="payment" constraintName="FK_user_id" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="user"/>
+    </changeSet>
+</databaseChangeLog>
