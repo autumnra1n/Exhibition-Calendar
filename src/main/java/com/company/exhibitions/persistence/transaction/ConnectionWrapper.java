@@ -6,11 +6,9 @@ import java.sql.SQLException;
 
 public class ConnectionWrapper {
     private final Connection connection;
-    private final boolean isTransaction;
 
-    public ConnectionWrapper(Connection connection, boolean isTransaction){
+    public ConnectionWrapper(Connection connection){
         this.connection = connection;
-        this.isTransaction = isTransaction;
     }
 
     public PreparedStatement createPreparedStatement(String sql) throws SQLException {
@@ -22,7 +20,7 @@ public class ConnectionWrapper {
     }
 
     public void close() throws SQLException{
-        if(!isTransaction){
+        if(!connection.getAutoCommit()){
                connection.close();
         }
     }

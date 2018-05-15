@@ -9,11 +9,13 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 public class TransactionUtil {
+
     private static final ThreadLocal<ConnectionWrapper> connections  = new ThreadLocal<>();
+    private static final TransactionUtil transactionUtil = new TransactionUtil();
 
     private TransactionUtil(){}
 
-    public static void beginTransaction() throws DataBaseException {
+    public void beginTransaction() throws DataBaseException {
         ConnectionWrapper con = connections.get();
         if(Objects.nonNull(con)){
             throw new DataBaseException();
@@ -21,14 +23,14 @@ public class TransactionUtil {
         try {
             Connection connection = ConnectionsPool.getInstance().getConnection();
             connection.setAutoCommit(false);
-            con = new ConnectionWrapper(connection, true);
+            con = new ConnectionWrapper(connection);
             connections.set(con);
         }catch(NamingException | SQLException e){
             throw new DataBaseException(e);
         }
     }
 
-    public static void endTransaction() throws DataBaseException {
+    public void endTransaction() throws DataBaseException {
         ConnectionWrapper con = connections.get();
         if(Objects.isNull(con)){
             throw new DataBaseException();
@@ -41,7 +43,7 @@ public class TransactionUtil {
         connections.set(null);
     }
 
-    public static void rollback() throws DataBaseException{
+    public void rollback() throws DataBaseException{
         ConnectionWrapper con = connections.get();
         if(Objects.isNull(con)){
             throw new DataBaseException();
@@ -53,7 +55,7 @@ public class TransactionUtil {
         }
     }
     
-    public static void commit() throws DataBaseException {
+    public void commit() throws DataBaseException {
         ConnectionWrapper con = connections.get();
         if(Objects.isNull(con)){
             throw new DataBaseException();
@@ -64,7 +66,7 @@ public class TransactionUtil {
             throw new DataBaseException(e);
         }
     }
-    public static ConnectionWrapper getConnection() throws DataBaseException{
+    public ConnectionWrapper getConnection() throws DataBaseException{
         ConnectionWrapper con = connections.get();
         if (Objects.nonNull(con)) {
             return con;
@@ -72,11 +74,14 @@ public class TransactionUtil {
         try {
             Connection connection = ConnectionsPool.getInstance().getConnection();
             connection.setAutoCommit(true);
-            con = new ConnectionWrapper(connection, false);
+            con = new ConnectionWrapper(connection);
             return con;
         }catch(NamingException | SQLException e){
                 throw new DataBaseException(e);
         }
+    }
 
+    public static TransactionUtil getInstance(){
+        return transactionUtil;
     }
 }
