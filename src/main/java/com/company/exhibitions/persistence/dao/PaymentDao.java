@@ -11,6 +11,7 @@ public interface PaymentDao {
     void insertPayment(Payment payment) throws DAOException, DataBaseException;
     void updatePayment(Payment payment) throws DAOException, DataBaseException;
     void deletePaymentById(int id) throws DAOException, DataBaseException;
+    Payment findPayment(Payment payment) throws DAOException, DataBaseException;
     List<Payment> findAll() throws DAOException, DataBaseException;
     Payment findPaymentById(int id) throws DAOException, DataBaseException;
     List<Payment> findPaymentsByUserId(int id) throws DAOException, DataBaseException;

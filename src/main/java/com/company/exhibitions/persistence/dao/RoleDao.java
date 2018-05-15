@@ -11,6 +11,7 @@ public interface RoleDao {
     void insertRole(Role role) throws DAOException, DataBaseException;
     void updateRole(Role role) throws DAOException, DataBaseException;
     void deleteRoleById(int id) throws DAOException, DataBaseException;
+    Role findRole(Role role) throws DAOException, DataBaseException;
     List<Role> findAll() throws DAOException, DataBaseException;
     Role findRoleById(int id) throws DAOException, DataBaseException;
 }
