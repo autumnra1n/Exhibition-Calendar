@@ -1,12 +1,12 @@
 package com.company.exhibitions.dao.mysql;
 
 import com.company.exhibitions.dao.ShowroomDao;
+import com.company.exhibitions.dao.utils.QueryManager;
 import com.company.exhibitions.dto.Showroom;
 import com.company.exhibitions.exception.DAOException;
 import com.company.exhibitions.exception.DataBaseException;
-import com.company.exhibitions.dao.utils.MySqlExecutable;
-import com.company.exhibitions.dao.utils.MySqlExecutor;
-import com.company.exhibitions.querymanager.MySqlQueryManager;
+import com.company.exhibitions.dao.utils.mysql.MySqlExecutor;
+import com.company.exhibitions.dao.utils.mysql.MySqlQueryManager;
 import com.company.exhibitions.transaction.ConnectionWrapper;
 import com.company.exhibitions.transaction.TransactionUtil;
 
@@ -18,11 +18,15 @@ import java.util.List;
 
 public class MySqlShowroomDao implements ShowroomDao {
 
+    private final MySqlExecutor<Showroom> executor = new MySqlExecutor<>();
+    private final QueryManager queryManager = new MySqlQueryManager();
+    private final TransactionUtil transactionUtil = TransactionUtil.getInstance();
+
     @Override
     public void insertShowroom(Showroom showroom) throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("showroom.Insert");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        executor.perform(con, () -> {
+            String sql = queryManager.getProperty("showroom.Insert");
             PreparedStatement ps = con.createPreparedStatement(sql);
             setShowroomFieldsToStatement(ps, showroom);
             ps.executeUpdate();
@@ -31,9 +35,9 @@ public class MySqlShowroomDao implements ShowroomDao {
 
     @Override
     public void updateShowroom(Showroom showroom) throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("showroom.Update");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        executor.perform(con, () -> {
+            String sql = queryManager.getProperty("showroom.Update");
             PreparedStatement ps = con.createPreparedStatement(sql);
             setShowroomFieldsToStatement(ps, showroom);
             ps.setInt(4, showroom.getId());
@@ -43,9 +47,9 @@ public class MySqlShowroomDao implements ShowroomDao {
 
     @Override
     public void deleteShowroomById(int id) throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("showroom.DeleteById");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        executor.perform(con, () -> {
+            String sql = queryManager.getProperty("showroom.DeleteById");
             PreparedStatement ps = con.createPreparedStatement(sql);
             ps.setInt(1, id);
             ps.executeUpdate();
@@ -54,37 +58,42 @@ public class MySqlShowroomDao implements ShowroomDao {
 
     @Override
     public List<Showroom> findAll() throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        List<Showroom> list = new ArrayList<>();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("showroom.SelectAll");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return executor.performEntityListSelect(con, () -> {
+            List<Showroom> list = new ArrayList<>();
+            String sql = queryManager.getProperty("showroom.SelectAll");
             PreparedStatement ps = con.createPreparedStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(processShowroomRow(rs));
             }
+            return list;
         });
-        return list;
+    }
+
+    @Override
+    public Showroom findShowroom(Showroom showroom) throws DAOException, DataBaseException{
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return executor.performEntitySelect(con, () -> {
+            String sql = queryManager.getProperty("showroom.findShowroom");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setString(1, showroom.getName());
+            ps.setString(2, showroom.getLocation());
+            ResultSet rs = ps.executeQuery();
+            return processShowroomRow(rs);
+        });
     }
 
     @Override
     public Showroom findShowroomById(int id) throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        class ShowroomExecutable implements MySqlExecutable {
-            private Showroom showroom;
-
-            @Override
-            public void exec() throws SQLException {
-                String sql = MySqlQueryManager.getProperty("showroom.SelectShowroomById");
-                PreparedStatement ps = con.createPreparedStatement(sql);
-                ps.setInt(1, id);
-                ResultSet rs = ps.executeQuery();
-                showroom = processShowroomRow(rs);
-            }
-        }
-        ShowroomExecutable showroomDaoExecutable = new ShowroomExecutable();
-        MySqlExecutor.execute(con, showroomDaoExecutable);
-        return showroomDaoExecutable.showroom;
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return executor.performEntitySelect(con, () -> {
+            String sql = queryManager.getProperty("showroom.SelectShowroomById");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            return processShowroomRow(rs);
+        });
     }
 
     private void setShowroomFieldsToStatement(PreparedStatement ps, Showroom showroom) throws SQLException {
@@ -98,7 +107,8 @@ public class MySqlShowroomDao implements ShowroomDao {
         String name = rs.getString("name");
         String location = rs.getString("location");
         String description = rs.getString("description");
-        return new Showroom.ShowroomBuilder(id,name)
+        return new Showroom.ShowroomBuilder(name)
+                .setId(id)
                 .setLocation(location)
                 .setDescription(description)
                 .build();

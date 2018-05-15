@@ -2,41 +2,50 @@ package com.company.exhibitions.dao.mysql;
 
 import com.company.exhibitions.dao.*;
 
-public class MySqlDaoFactory {
-    private static final MySqlDaoFactory factory = new MySqlDaoFactory();
-    private ExpositionDao mySqlExpositionDao = new MySqlExpositionDao();
-    private PaymentDao paymentDao = new MySqlPaymentDao();
-    private TicketDao ticketDao = new MySqlTicketDao();
-    private RoleDao roleDao = new MySqlRoleDao();
-    private ShowroomDao showroomDao = new MySqlShowroomDao();
-    private UserDao userDao = new MySqlUserDao();
+public class MySqlDaoFactory implements DaoFactory {
 
-    private MySqlDaoFactory(){}
+    private final ExpositionDao mySqlExpositionDao;
+    private final PaymentDao paymentDao;
+    private final TicketDao ticketDao;
+    private final RoleDao roleDao;
+    private final ShowroomDao showroomDao;
+    private final UserDao userDao;
 
-    public static MySqlDaoFactory getInstance(){
-        return factory;
+    public MySqlDaoFactory(){
+        this.mySqlExpositionDao = new MySqlExpositionDao();
+        this.paymentDao = new MySqlPaymentDao();
+        this.ticketDao = new MySqlTicketDao();
+        this.roleDao = new MySqlRoleDao();
+        this.showroomDao = new MySqlShowroomDao();
+        this.userDao = new MySqlUserDao();
     }
 
+    @Override
     public ExpositionDao getExpositionDao(){
         return mySqlExpositionDao;
     }
 
+    @Override
     public PaymentDao getPaymentDao() {
         return paymentDao;
     }
 
+    @Override
     public TicketDao getTicketDao(){
         return ticketDao;
     }
 
+    @Override
     public RoleDao getRoleDao(){
         return roleDao;
     }
 
+    @Override
     public ShowroomDao getShowroomDao(){
         return showroomDao;
     }
 
+    @Override
     public UserDao getUserDao(){
         return userDao;
     }

@@ -1,13 +1,14 @@
 package com.company.exhibitions.dao.mysql;
 
 import com.company.exhibitions.dao.TicketDao;
+import com.company.exhibitions.dao.utils.DaoExecutor;
+import com.company.exhibitions.dao.utils.QueryManager;
 import com.company.exhibitions.dto.Exposition;
 import com.company.exhibitions.dto.Ticket;
 import com.company.exhibitions.exception.DAOException;
 import com.company.exhibitions.exception.DataBaseException;
-import com.company.exhibitions.dao.utils.MySqlExecutable;
-import com.company.exhibitions.dao.utils.MySqlExecutor;
-import com.company.exhibitions.querymanager.MySqlQueryManager;
+import com.company.exhibitions.dao.utils.mysql.MySqlExecutor;
+import com.company.exhibitions.dao.utils.mysql.MySqlQueryManager;
 import com.company.exhibitions.transaction.ConnectionWrapper;
 import com.company.exhibitions.transaction.TransactionUtil;
 
@@ -19,11 +20,15 @@ import java.util.List;
 
 public class MySqlTicketDao implements TicketDao {
 
+    private final DaoExecutor<Ticket> executor = new MySqlExecutor<>();
+    private final QueryManager queryManager = new MySqlQueryManager();
+    private final TransactionUtil transactionUtil = TransactionUtil.getInstance();
+
     @Override
     public void insertTicket(Ticket ticket) throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("ticket.Insert");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        executor.perform(con, () -> {
+            String sql = queryManager.getProperty("ticket.Insert");
             PreparedStatement ps = con.createPreparedStatement(sql);
             setTicketFieldsToStatement(ps, ticket);
             ps.executeUpdate();
@@ -32,9 +37,9 @@ public class MySqlTicketDao implements TicketDao {
 
     @Override
     public void updateTicket(Ticket ticket) throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("ticket.Update");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        executor.perform(con, () -> {
+            String sql = queryManager.getProperty("ticket.Update");
             PreparedStatement ps = con.createPreparedStatement(sql);
             setTicketFieldsToStatement(ps, ticket);
             ps.setInt(4, ticket.getId());
@@ -44,9 +49,9 @@ public class MySqlTicketDao implements TicketDao {
 
     @Override
     public void deleteTicketById(int id) throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("ticket.DeleteById");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        executor.perform(con, () -> {
+            String sql = queryManager.getProperty("ticket.DeleteById");
             PreparedStatement ps = con.createPreparedStatement(sql);
             ps.setInt(1, id);
             ps.executeUpdate();
@@ -54,54 +59,58 @@ public class MySqlTicketDao implements TicketDao {
     }
 
     @Override
+    public Ticket findTicket(Ticket ticket) throws DAOException, DataBaseException{
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return executor.performEntitySelect(con, () -> {
+            String sql = queryManager.getProperty("ticket.findTicket");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            setTicketFieldsToStatement(ps, ticket);
+            ResultSet rs = ps.executeQuery();
+            return processTicketRow(rs);
+        });
+    }
+
+    @Override
     public List<Ticket> findAll() throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        List<Ticket> list = new ArrayList<>();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("ticket.SelectAll");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return executor.performEntityListSelect(con, () -> {
+            List<Ticket> list = new ArrayList<>();
+            String sql = queryManager.getProperty("ticket.SelectAll");
             PreparedStatement ps = con.createPreparedStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(processTicketRow(rs));
             }
+            return list;
         });
-        return list;
     }
 
     @Override
     public Ticket findTicketById(int id) throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        class TicketExecutable implements MySqlExecutable {
-            private Ticket ticket;
-
-            @Override
-            public void exec() throws SQLException {
-                String sql = MySqlQueryManager.getProperty("ticket.SelectTicketById");
-                PreparedStatement ps = con.createPreparedStatement(sql);
-                ps.setInt(1, id);
-                ResultSet rs = ps.executeQuery();
-                ticket = processTicketRow(rs);
-            }
-        }
-        TicketExecutable ticketDaoExecutable = new TicketExecutable();
-        MySqlExecutor.execute(con, ticketDaoExecutable);
-        return ticketDaoExecutable.ticket;
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return executor.performEntitySelect(con, () -> {
+            String sql = queryManager.getProperty("ticket.SelectTicketById");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            return processTicketRow(rs);
+        });
     }
 
     @Override
     public List<Ticket> findTicketsByExpositionId(int id) throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        List<Ticket> list = new ArrayList<>();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("ticket.SelectTicketsByExpositionId");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return executor.performEntityListSelect(con, () -> {
+            List<Ticket> list = new ArrayList<>();
+            String sql = queryManager.getProperty("ticket.SelectTicketsByExpositionId");
             PreparedStatement ps = con.createPreparedStatement(sql);
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(processTicketRow(rs));
             }
+            return list;
         });
-        return list;
     }
 
     private void setTicketFieldsToStatement(PreparedStatement ps, Ticket ticket) throws SQLException {
@@ -118,8 +127,11 @@ public class MySqlTicketDao implements TicketDao {
         final int amount = rs.getInt("ticket.amount");
         final int expositionId = rs.getInt("ticket.exposition_id");
         String expositionTheme = rs.getString("exposition.theme");
-        return new Ticket.TicketBuilder(id, description, value,
-                new Exposition.ExpositionBuilder(expositionId, expositionTheme).build())
+        return new Ticket.TicketBuilder(description, value,
+                new Exposition.ExpositionBuilder(expositionTheme)
+                        .setId(expositionId)
+                        .build())
+                .setId(id)
                 .setAmount(amount)
                 .build();
     }

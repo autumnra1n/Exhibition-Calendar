@@ -1,15 +1,16 @@
 package com.company.exhibitions.dao.mysql;
 
 import com.company.exhibitions.dao.PaymentDao;
+import com.company.exhibitions.dao.utils.DaoExecutor;
+import com.company.exhibitions.dao.utils.QueryManager;
 import com.company.exhibitions.dto.Exposition;
 import com.company.exhibitions.dto.Payment;
 import com.company.exhibitions.dto.Ticket;
 import com.company.exhibitions.dto.User;
 import com.company.exhibitions.exception.DAOException;
 import com.company.exhibitions.exception.DataBaseException;
-import com.company.exhibitions.dao.utils.MySqlExecutable;
-import com.company.exhibitions.dao.utils.MySqlExecutor;
-import com.company.exhibitions.querymanager.MySqlQueryManager;
+import com.company.exhibitions.dao.utils.mysql.MySqlExecutor;
+import com.company.exhibitions.dao.utils.mysql.MySqlQueryManager;
 import com.company.exhibitions.transaction.ConnectionWrapper;
 import com.company.exhibitions.transaction.TransactionUtil;
 
@@ -19,11 +20,15 @@ import java.util.List;
 
 public class MySqlPaymentDao implements PaymentDao {
 
+    private final DaoExecutor<Payment> executor = new MySqlExecutor<>();
+    private final QueryManager queryManager = new MySqlQueryManager();
+    private final TransactionUtil transactionUtil = TransactionUtil.getInstance();
+
     @Override
     public void insertPayment(Payment payment) throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("payment.Insert");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        executor.perform(con, () -> {
+            String sql = queryManager.getProperty("payment.Insert");
             PreparedStatement ps = con.createPreparedStatement(sql);
             setPaymentFieldsToStatement(ps, payment);
             ps.executeUpdate();
@@ -32,9 +37,9 @@ public class MySqlPaymentDao implements PaymentDao {
 
     @Override
     public void updatePayment(Payment payment) throws DAOException, DataBaseException {
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("payment.Update");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        executor.perform(con, () -> {
+            String sql = queryManager.getProperty("payment.Update");
             PreparedStatement ps = con.createPreparedStatement(sql);
             setPaymentFieldsToStatement(ps, payment);
             ps.setInt(4, payment.getId());
@@ -44,9 +49,9 @@ public class MySqlPaymentDao implements PaymentDao {
 
     @Override
     public void deletePaymentById(int id) throws DAOException, DataBaseException{
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("payment.DeleteById");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        executor.perform(con, () -> {
+            String sql = queryManager.getProperty("payment.DeleteById");
             PreparedStatement ps = con.createPreparedStatement(sql);
             ps.setInt(1, id);
             ps.executeUpdate();
@@ -54,52 +59,71 @@ public class MySqlPaymentDao implements PaymentDao {
     }
 
     @Override
+    public Payment findPayment(Payment payment) throws DAOException, DataBaseException{
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return executor.performEntitySelect(con, () -> {
+            String sql = queryManager.getProperty("payment.findPayment");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1,payment.getId());
+            ps.setInt(2, payment.getTicket().getId());
+            ResultSet rs = ps.executeQuery();
+            return processPaymentRow(rs);
+        });
+    }
+
+    @Override
     public List<Payment> findAll() throws DAOException, DataBaseException{
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        List<Payment> list = new ArrayList<>();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("payment.SelectAll");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return executor.performEntityListSelect(con, () -> {
+            List<Payment> list = new ArrayList<>();
+            String sql = queryManager.getProperty("payment.SelectAll");
             PreparedStatement ps = con.createPreparedStatement(sql);
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
                 list.add(processPaymentRow(rs));
             }
+            return list;
         });
-        return list;
     }
 
     @Override
     public Payment findPaymentById(int id) throws DAOException, DataBaseException{
-        String sql = MySqlQueryManager.getProperty("payment.SelectPaymentById");
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        PaymentExecutable expositionDaoExecutable = new PaymentExecutable(con, id, sql);
-        MySqlExecutor.execute(con, expositionDaoExecutable);
-        return expositionDaoExecutable.payment;
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return executor.performEntitySelect(con, () -> {
+            String sql = queryManager.getProperty("payment.SelectPaymentById");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1,id);
+            ResultSet rs = ps.executeQuery();
+            return processPaymentRow(rs);
+        });
     }
 
     @Override
     public List<Payment> findPaymentsByUserId(int id) throws DAOException, DataBaseException{
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        List<Payment> list = new ArrayList<>();
-        MySqlExecutor.execute(con, () -> {
-            String sql = MySqlQueryManager.getProperty("payment.SelectPaymentsByUserId");
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return executor.performEntityListSelect(con, () -> {
+            List<Payment> list = new ArrayList<>();
+            String sql = queryManager.getProperty("payment.SelectPaymentsByUserId");
             PreparedStatement ps = con.createPreparedStatement(sql);
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
                 list.add(processPaymentRow(rs));
             }
+            return list;
         });
-        return list;
     }
 
     @Override
     public Payment findPaymentByTicketId(int id) throws DAOException, DataBaseException{
-        String sql = MySqlQueryManager.getProperty("payment.SelectPaymentByTicketId");
-        ConnectionWrapper con = TransactionUtil.getConnection();
-        PaymentExecutable expositionDaoExecutable = new PaymentExecutable(con, id, sql);
-        MySqlExecutor.execute(con, expositionDaoExecutable);
-        return expositionDaoExecutable.payment;
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return executor.performEntitySelect(con, () -> {
+            String sql = queryManager.getProperty("payment.SelectPaymentByTicketId");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1,id);
+            ResultSet rs = ps.executeQuery();
+            return processPaymentRow(rs);
+        });
     }
 
     private void setPaymentFieldsToStatement(PreparedStatement ps, Payment payment) throws SQLException {
@@ -118,28 +142,15 @@ public class MySqlPaymentDao implements PaymentDao {
         final int ticketValue = rs.getInt("ticket.value");
         final int expositionId = rs.getInt("ticket.exposition_id");
         String expositionTheme = rs.getString("exposition.theme");
-        return new Payment(id,date,new User.UserBuilder(userId,userLogin).build(),
-                new Ticket.TicketBuilder(ticketId, ticketDescription, ticketValue,
-                        new Exposition.ExpositionBuilder(expositionId, expositionTheme).build()).build());
-    }
-
-    private class PaymentExecutable implements MySqlExecutable {
-        private Payment payment;
-        private final ConnectionWrapper con;
-        private final int id;
-        private final String sql;
-        PaymentExecutable(ConnectionWrapper con, int id, String sql) {
-            this.con = con;
-            this.id = id;
-            this.sql = sql;
-        }
-
-        @Override
-        public void exec() throws SQLException {
-            PreparedStatement ps = con.createPreparedStatement(sql);
-            ps.setInt(1,id);
-            ResultSet rs = ps.executeQuery();
-            payment = processPaymentRow(rs);
-        }
+        return new Payment.PaymentBuilder(date,new User.UserBuilder(userLogin)
+                .setId(userId)
+                .build(),
+                new Ticket.TicketBuilder(ticketDescription, ticketValue, new Exposition.ExpositionBuilder(expositionTheme)
+                        .setId(expositionId)
+                        .build())
+                        .setId(ticketId)
+                        .build())
+                .setId(id)
+                .build();
     }
 }
