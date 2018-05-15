@@ -20,16 +20,19 @@ public class Exposition {
         this.showroom = builder.showroom;
     }
     public static class ExpositionBuilder {
-        private final int id;
+        private int id;
         private final String theme;
         private Date dateStart;
         private Time startTime;
         private String description;
         private Showroom showroom;
 
-        public ExpositionBuilder(int id, String theme) {
-            this.id = id;
+        public ExpositionBuilder(String theme) {
             this.theme = theme;
+        }
+        public ExpositionBuilder setId(int id) {
+            this.id = id;
+            return this;
         }
         public ExpositionBuilder setDateStart(Date dateStart) {
             this.dateStart = dateStart;

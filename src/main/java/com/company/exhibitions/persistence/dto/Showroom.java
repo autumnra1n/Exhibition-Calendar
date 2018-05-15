@@ -14,14 +14,17 @@ public class Showroom {
     }
 
     public static class ShowroomBuilder{
-        private final int id;
+        private int id;
         private final String name;
         private String location;
         private String description;
 
-        public ShowroomBuilder(int id, String name) {
-            this.id = id;
+        public ShowroomBuilder(String name) {
             this.name = name;
+        }
+        public ShowroomBuilder setId(int id){
+            this.id = id;
+            return this;
         }
         public ShowroomBuilder setLocation(String location){
             this.location = location;

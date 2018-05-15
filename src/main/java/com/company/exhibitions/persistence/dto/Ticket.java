@@ -16,17 +16,20 @@ public class Ticket {
     }
 
     public static class TicketBuilder{
-        private final int id;
+        private int id;
         private final String description;
         private final Exposition exposition;
         private final int value;
         private int amount;
 
-        public TicketBuilder(int id, String description, int value, Exposition exposition) {
-            this.id = id;
+        public TicketBuilder(String description, int value, Exposition exposition) {
             this.description = description;
             this.value = value;
             this.exposition = exposition;
+        }
+        public TicketBuilder setId(int id){
+            this.id = id;
+            return this;
         }
         public TicketBuilder setAmount(int amount){
             this.amount = amount;

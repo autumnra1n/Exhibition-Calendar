@@ -8,11 +8,31 @@ public class Payment {
     private final User user;
     private final Ticket ticket;
 
-    public Payment(int id, Date date, User user, Ticket ticket) {
-        this.id = id;
-        this.date = date;
-        this.user = user;
-        this.ticket = ticket;
+    private Payment(PaymentBuilder paymentBuilder) {
+        this.id = paymentBuilder.id;
+        this.date = paymentBuilder.date;
+        this.user = paymentBuilder.user;
+        this.ticket = paymentBuilder.ticket;
+    }
+
+    public static class PaymentBuilder{
+        private int id;
+        private final Date date;
+        private final User user;
+        private final Ticket ticket;
+
+        public PaymentBuilder(Date date, User user, Ticket ticket){
+            this.date = date;
+            this.user = user;
+            this.ticket = ticket;
+        }
+        public PaymentBuilder setId(int id){
+            this.id = id;
+            return this;
+        }
+        public Payment build(){
+            return new Payment(this);
+        }
     }
 
     public int getId() {

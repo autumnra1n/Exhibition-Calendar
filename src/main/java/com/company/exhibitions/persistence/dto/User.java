@@ -19,7 +19,7 @@ public class User {
         this.role = builder.role;
     }
     public static class UserBuilder{
-        private final int id;
+        private int id;
         private final String login;
         private String password;
         private String email;
@@ -27,9 +27,12 @@ public class User {
         private String lastName;
         private Role role;
 
-        public UserBuilder(int id, String login) {
-            this.id = id;
+        public UserBuilder(String login) {
             this.login = login;
+        }
+        public UserBuilder setId(int id){
+            this.id = id;
+            return this;
         }
         public UserBuilder setPassword(String password){
             this.password = password;
