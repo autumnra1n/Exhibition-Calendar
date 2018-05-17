@@ -1,4 +1,4 @@
-package com.company.exhibitions.web.controller.validation.commonparametersvalidators;
+package com.company.exhibitions.web.controller.validation.common;
 
 import com.company.exhibitions.web.controller.validation.ControllerValidator;
 import com.company.exhibitions.web.controller.validation.CustomRequestAttributes;

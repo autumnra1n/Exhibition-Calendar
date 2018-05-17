@@ -1,19 +1,19 @@
-package com.company.exhibitions.web.controller.validation.commonparametersvalidators;
+package com.company.exhibitions.web.controller.validation.common;
 
 import com.company.exhibitions.web.controller.validation.ControllerValidator;
 import com.company.exhibitions.web.controller.validation.CustomRequestAttributes;
 
-import java.sql.Time;
+import java.sql.Date;
 import java.util.Map;
 
-public class TimeValidator extends ControllerValidator {
+public class DateValidator extends ControllerValidator {
     @Override
     public String defineAttribute(Map<String, String> map) {
         try{
-            Time.valueOf(map.get("time"));
+            Date.valueOf(map.get("date"));
             return defineNextValidator(map);
         } catch(Exception e) {
-            return CustomRequestAttributes.INVALID_TIME.name().toLowerCase();
+            return CustomRequestAttributes.INVALID_DATE.name().toLowerCase();
         }
     }
 }

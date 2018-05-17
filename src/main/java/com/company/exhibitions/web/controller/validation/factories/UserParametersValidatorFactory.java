@@ -1,7 +1,7 @@
 package com.company.exhibitions.web.controller.validation.factories;
 
 import com.company.exhibitions.web.controller.validation.ControllerValidator;
-import com.company.exhibitions.web.controller.validation.userparametersvalidator.*;
+import com.company.exhibitions.web.controller.validation.user.*;
 
 public class UserParametersValidatorFactory {
 

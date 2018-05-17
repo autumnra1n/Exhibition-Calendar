@@ -1,4 +1,4 @@
-package com.company.exhibitions.web.controller.validation.userparametersvalidator;
+package com.company.exhibitions.web.controller.validation.showroom;
 
 import com.company.exhibitions.web.controller.validation.ControllerValidator;
 import com.company.exhibitions.web.controller.validation.CustomRequestAttributes;
@@ -6,13 +6,13 @@ import com.company.exhibitions.web.controller.validation.CustomRequestAttributes
 import java.util.Map;
 import java.util.Objects;
 
-public class FirstNameValidator extends ControllerValidator {
+public class ShowroomNameValidator extends ControllerValidator {
     @Override
     public String defineAttribute(Map<String, String> map) {
-        if(!Objects.isNull(map.get("firstName")) && map.get("firstName").length()<32){
+        if(!Objects.isNull(map.get("name")) && map.get("name").length()<50){
             return defineNextValidator(map);
         }
         else
-            return CustomRequestAttributes.INVALID_FIRST_NAME.name().toLowerCase();
+            return CustomRequestAttributes.INVALID_SHOWROOM_NAME.name().toLowerCase();
     }
 }

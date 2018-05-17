@@ -1,9 +1,9 @@
 package com.company.exhibitions.web.controller.validation.factories;
 
 import com.company.exhibitions.web.controller.validation.ControllerValidator;
-import com.company.exhibitions.web.controller.validation.ticketparametersvalidator.TicketAmountValidator;
-import com.company.exhibitions.web.controller.validation.ticketparametersvalidator.TicketDescriptionValidator;
-import com.company.exhibitions.web.controller.validation.ticketparametersvalidator.TicketValueValidator;
+import com.company.exhibitions.web.controller.validation.ticket.TicketAmountValidator;
+import com.company.exhibitions.web.controller.validation.ticket.TicketDescriptionValidator;
+import com.company.exhibitions.web.controller.validation.ticket.TicketValueValidator;
 
 public class TicketParametersValidatorFactory {
 

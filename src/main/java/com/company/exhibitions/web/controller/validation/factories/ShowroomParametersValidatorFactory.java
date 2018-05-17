@@ -1,8 +1,8 @@
 package com.company.exhibitions.web.controller.validation.factories;
 
 import com.company.exhibitions.web.controller.validation.ControllerValidator;
-import com.company.exhibitions.web.controller.validation.showroomparametersvalidator.ShowroomLocationValidator;
-import com.company.exhibitions.web.controller.validation.showroomparametersvalidator.ShowroomNameValidator;
+import com.company.exhibitions.web.controller.validation.showroom.ShowroomLocationValidator;
+import com.company.exhibitions.web.controller.validation.showroom.ShowroomNameValidator;
 
 public class ShowroomParametersValidatorFactory {
 

@@ -1,4 +1,4 @@
-package com.company.exhibitions.web.controller.validation.userparametersvalidator;
+package com.company.exhibitions.web.controller.validation.user;
 
 import com.company.exhibitions.web.controller.validation.ControllerValidator;
 import com.company.exhibitions.web.controller.validation.CustomRequestAttributes;
