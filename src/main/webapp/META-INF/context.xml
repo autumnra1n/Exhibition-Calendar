@@ -2,14 +2,14 @@
 <Context>
     <Resource
             name="jdbc/exhibitions"
-            author="Container"
             type="javax.sql.DataSource"
             maxTotal="10"
             maxIdle="10"
             maxWaitMillis="10000"
             username="root"
-            password="root"
+            password="c1a2t3r4u5n6"
             driverClassName="com.mysql.jdbc.Driver"
             url="jdbc:mysql://localhost:3306/exhibitions"
     />
+    <JarScanner scanClassPath="false"/>
 </Context>

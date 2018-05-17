@@ -10,11 +10,7 @@
 <head>
     <title>Title</title>
 </head>
-<form action="handler" method="get">
-    <input type="text" name="username"/>
-    <input type="submit" name="send" value="ok"/>
-</form>
 <body>
-
+<jsp:forward page="WEB-INF/jsp/login.jsp"/>
 </body>
 </html>
