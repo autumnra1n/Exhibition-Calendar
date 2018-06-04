@@ -7,6 +7,11 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ShowroomLocationValidator extends ControllerValidator {
+
+    public ShowroomLocationValidator(ControllerValidator next) {
+        super(next);
+    }
+
     @Override
     public String defineAttribute(Map<String, String> map) {
         if(!Objects.isNull(map.get("location")) && map.get("location").length()<50){

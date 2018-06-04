@@ -108,9 +108,6 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="Михаил (generated)" id="1525470651367-7">
-        <addUniqueConstraint columnNames="ticket_id" constraintName="ticket_unique" tableName="payment"/>
-    </changeSet>
     <changeSet author="Михаил (generated)" id="1525470651367-8">
         <createIndex indexName="FK_exposition_id" tableName="ticket">
             <column name="exposition_id"/>

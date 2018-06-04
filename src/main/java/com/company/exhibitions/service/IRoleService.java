@@ -12,6 +12,7 @@ public interface IRoleService {
     void updateRole(Map <String, String> parameters) throws ServiceException;
     void deleteRole(Map <String, String> parameters) throws ServiceException;
     Role findRole(Map <String, String> parameters) throws ServiceException;
-    List<Role> findAll() throws ServiceException;
+    List<Role> findAll(Map <String, String> parameters) throws ServiceException;
     Role findRoleById (Map <String, String> parameters) throws ServiceException;
+    Integer getNumberOfRows() throws ServiceException;
 }

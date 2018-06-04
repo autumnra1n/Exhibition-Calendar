@@ -11,5 +11,5 @@ public interface DaoExecutor<T> {
 
     void perform(ConnectionWrapper con, MySqlExecutable ex) throws DAOException, DataBaseException;
     T performEntitySelect(ConnectionWrapper con, MySqlEntityExecutable<T> ex) throws DAOException, DataBaseException;
-    List<T> performEntityListSelect(ConnectionWrapper con, MySqlEntityExecutable<List<T>> ex) throws DAOException, DataBaseException;
+    List<T> performEntityListSelect(ConnectionWrapper con, MySqlEntityListExecutable<T> ex) throws DAOException, DataBaseException;
 }

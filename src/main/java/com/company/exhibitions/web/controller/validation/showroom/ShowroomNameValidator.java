@@ -7,6 +7,11 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ShowroomNameValidator extends ControllerValidator {
+
+    public ShowroomNameValidator(ControllerValidator next) {
+        super(next);
+    }
+
     @Override
     public String defineAttribute(Map<String, String> map) {
         if(!Objects.isNull(map.get("name")) && map.get("name").length()<50){

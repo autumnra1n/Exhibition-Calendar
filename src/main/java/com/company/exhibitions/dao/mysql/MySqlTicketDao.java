@@ -11,6 +11,7 @@ import com.company.exhibitions.dao.utils.mysql.MySqlExecutor;
 import com.company.exhibitions.dao.utils.mysql.MySqlQueryManager;
 import com.company.exhibitions.transaction.ConnectionWrapper;
 import com.company.exhibitions.transaction.TransactionUtil;
+import com.company.exhibitions.utils.Mapper;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,8 +22,9 @@ import java.util.List;
 public class MySqlTicketDao implements TicketDao {
 
     private final DaoExecutor<Ticket> executor = new MySqlExecutor<>();
+    private final DaoExecutor<Integer> rowsFounder = new MySqlExecutor<>();
     private final QueryManager queryManager = new MySqlQueryManager();
-    private final TransactionUtil transactionUtil = TransactionUtil.getInstance();
+    private final TransactionUtil transactionUtil = Mapper.getTransactionUtil();
 
     @Override
     public void insertTicket(Ticket ticket) throws DAOException, DataBaseException {
@@ -42,7 +44,7 @@ public class MySqlTicketDao implements TicketDao {
             String sql = queryManager.getProperty("ticket.Update");
             PreparedStatement ps = con.createPreparedStatement(sql);
             setTicketFieldsToStatement(ps, ticket);
-            ps.setInt(4, ticket.getId());
+            ps.setInt(5, ticket.getId());
             ps.executeUpdate();
         });
     }
@@ -75,12 +77,14 @@ public class MySqlTicketDao implements TicketDao {
     }
 
     @Override
-    public List<Ticket> findAll() throws DAOException, DataBaseException {
+    public List<Ticket> findAll(int limit, int offset) throws DAOException, DataBaseException {
         ConnectionWrapper con = transactionUtil.getConnection();
         return executor.performEntityListSelect(con, () -> {
             List<Ticket> list = new ArrayList<>();
             String sql = queryManager.getProperty("ticket.SelectAll");
             PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1, offset);
+            ps.setInt(2, limit);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(processTicketRow(rs));
@@ -106,13 +110,15 @@ public class MySqlTicketDao implements TicketDao {
     }
 
     @Override
-    public List<Ticket> findTicketsByExpositionId(int id) throws DAOException, DataBaseException {
+    public List<Ticket> findTicketsByExpositionId(int id, int limit, int offset) throws DAOException, DataBaseException {
         ConnectionWrapper con = transactionUtil.getConnection();
         return executor.performEntityListSelect(con, () -> {
             List<Ticket> list = new ArrayList<>();
             String sql = queryManager.getProperty("ticket.SelectTicketsByExpositionId");
             PreparedStatement ps = con.createPreparedStatement(sql);
             ps.setInt(1, id);
+            ps.setInt(2, offset);
+            ps.setInt(3, limit);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(processTicketRow(rs));
@@ -121,11 +127,42 @@ public class MySqlTicketDao implements TicketDao {
         });
     }
 
+    @Override
+    public Integer getNumberOfRows() throws DAOException, DataBaseException {
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return rowsFounder.performEntitySelect(con, () -> {
+            Integer rows = null;
+            String sql = queryManager.getProperty("ticket.getNumberOfRows");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                rows = rs.getInt("total");
+            }
+            return rows;
+        });
+    }
+
+    @Override
+    public Integer getNumberOfRowsByExpositionId(int id) throws DAOException, DataBaseException {
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return rowsFounder.performEntitySelect(con, () -> {
+            Integer rows = null;
+            String sql = queryManager.getProperty("ticket.getNumberOfRowsByExpositionId");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                rows = rs.getInt("total");
+            }
+            return rows;
+        });
+    }
+
     private void setTicketFieldsToStatement(PreparedStatement ps, Ticket ticket) throws SQLException {
         ps.setString(1, ticket.getDescription());
-        ps.setInt(1, ticket.getValue());;
-        ps.setInt(2, ticket.getAmount());
-        ps.setInt(3, ticket.getExposition().getId());
+        ps.setInt(2, ticket.getValue());
+        ps.setInt(3, ticket.getAmount());
+        ps.setInt(4, ticket.getExposition().getId());
     }
 
     private Ticket processTicketRow(ResultSet rs) throws SQLException {

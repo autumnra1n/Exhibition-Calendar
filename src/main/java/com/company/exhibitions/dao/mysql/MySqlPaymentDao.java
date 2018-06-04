@@ -13,6 +13,8 @@ import com.company.exhibitions.dao.utils.mysql.MySqlExecutor;
 import com.company.exhibitions.dao.utils.mysql.MySqlQueryManager;
 import com.company.exhibitions.transaction.ConnectionWrapper;
 import com.company.exhibitions.transaction.TransactionUtil;
+import com.company.exhibitions.utils.DateUtil;
+import com.company.exhibitions.utils.Mapper;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -21,8 +23,9 @@ import java.util.List;
 public class MySqlPaymentDao implements PaymentDao {
 
     private final DaoExecutor<Payment> executor = new MySqlExecutor<>();
+    private final DaoExecutor<Integer> rowsFounder = new MySqlExecutor<>();
     private final QueryManager queryManager = new MySqlQueryManager();
-    private final TransactionUtil transactionUtil = TransactionUtil.getInstance();
+    private final TransactionUtil transactionUtil = Mapper.getTransactionUtil();
 
     @Override
     public void insertPayment(Payment payment) throws DAOException, DataBaseException {
@@ -76,12 +79,14 @@ public class MySqlPaymentDao implements PaymentDao {
     }
 
     @Override
-    public List<Payment> findAll() throws DAOException, DataBaseException{
+    public List<Payment> findAll(int limit, int offset) throws DAOException, DataBaseException{
         ConnectionWrapper con = transactionUtil.getConnection();
         return executor.performEntityListSelect(con, () -> {
             List<Payment> list = new ArrayList<>();
             String sql = queryManager.getProperty("payment.SelectAll");
             PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1, offset);
+            ps.setInt(2, limit);
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
                 list.add(processPaymentRow(rs));
@@ -107,13 +112,15 @@ public class MySqlPaymentDao implements PaymentDao {
     }
 
     @Override
-    public List<Payment> findPaymentsByUserId(int id) throws DAOException, DataBaseException{
+    public List<Payment> findPaymentsByUserId(int id, int limit, int offset) throws DAOException, DataBaseException{
         ConnectionWrapper con = transactionUtil.getConnection();
         return executor.performEntityListSelect(con, () -> {
             List<Payment> list = new ArrayList<>();
             String sql = queryManager.getProperty("payment.SelectPaymentsByUserId");
             PreparedStatement ps = con.createPreparedStatement(sql);
             ps.setInt(1, id);
+            ps.setInt(2, offset);
+            ps.setInt(3, limit);
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
                 list.add(processPaymentRow(rs));
@@ -135,6 +142,37 @@ public class MySqlPaymentDao implements PaymentDao {
                 payment = processPaymentRow(rs);
             }
             return payment;
+        });
+    }
+
+    @Override
+    public Integer getNumberOfRows() throws DAOException, DataBaseException {
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return rowsFounder.performEntitySelect(con, () -> {
+            Integer rows = null;
+            String sql = queryManager.getProperty("payment.getNumberOfRows");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                rows = rs.getInt("total");
+            }
+            return rows;
+        });
+    }
+
+    @Override
+    public Integer getNumberOfRowsByUserId(int id) throws DAOException, DataBaseException {
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return rowsFounder.performEntitySelect(con, () -> {
+            Integer rows = null;
+            String sql = queryManager.getProperty("payment.getNumberOfRowsByUserId");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                rows = rs.getInt("total");
+            }
+            return rows;
         });
     }
 

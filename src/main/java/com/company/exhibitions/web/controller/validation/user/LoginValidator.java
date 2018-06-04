@@ -11,6 +11,10 @@ public class LoginValidator extends ControllerValidator {
 
     private static final String USERNAME_PATTERN = "^[a-z0-9_-]{3,32}$";
 
+    public LoginValidator(ControllerValidator next) {
+        super(next);
+    }
+
     @Override
     public String defineAttribute(Map<String, String> map) {
         String login = map.get("login");

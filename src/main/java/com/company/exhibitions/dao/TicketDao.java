@@ -12,7 +12,9 @@ public interface TicketDao {
     void updateTicket(Ticket ticket) throws DAOException, DataBaseException;
     void deleteTicketById(int id) throws DAOException, DataBaseException;
     Ticket findTicket(Ticket ticket) throws DAOException, DataBaseException;
-    List<Ticket> findAll() throws DAOException, DataBaseException;
+    List<Ticket> findAll(int limit, int offset) throws DAOException, DataBaseException;
     Ticket findTicketById(int id) throws DAOException, DataBaseException;
-    List<Ticket> findTicketsByExpositionId(int id) throws DAOException, DataBaseException;
+    List<Ticket> findTicketsByExpositionId(int id, int limit, int offset) throws DAOException, DataBaseException;
+    Integer getNumberOfRows() throws DAOException, DataBaseException;
+    Integer getNumberOfRowsByExpositionId(int id) throws DAOException, DataBaseException;
 }

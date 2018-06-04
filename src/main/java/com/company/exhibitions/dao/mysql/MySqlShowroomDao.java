@@ -2,6 +2,7 @@ package com.company.exhibitions.dao.mysql;
 
 import com.company.exhibitions.dao.ShowroomDao;
 import com.company.exhibitions.dao.utils.QueryManager;
+import com.company.exhibitions.dao.utils.mysql.MySqlEntityExecutable;
 import com.company.exhibitions.dto.Showroom;
 import com.company.exhibitions.exception.DAOException;
 import com.company.exhibitions.exception.DataBaseException;
@@ -9,6 +10,7 @@ import com.company.exhibitions.dao.utils.mysql.MySqlExecutor;
 import com.company.exhibitions.dao.utils.mysql.MySqlQueryManager;
 import com.company.exhibitions.transaction.ConnectionWrapper;
 import com.company.exhibitions.transaction.TransactionUtil;
+import com.company.exhibitions.utils.Mapper;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,8 +21,9 @@ import java.util.List;
 public class MySqlShowroomDao implements ShowroomDao {
 
     private final MySqlExecutor<Showroom> executor = new MySqlExecutor<>();
+    private final MySqlExecutor<Integer> rowsFounder = new MySqlExecutor<>();
     private final QueryManager queryManager = new MySqlQueryManager();
-    private final TransactionUtil transactionUtil = TransactionUtil.getInstance();
+    private final TransactionUtil transactionUtil = Mapper.getTransactionUtil();
 
     @Override
     public void insertShowroom(Showroom showroom) throws DAOException, DataBaseException {
@@ -57,12 +60,14 @@ public class MySqlShowroomDao implements ShowroomDao {
     }
 
     @Override
-    public List<Showroom> findAll() throws DAOException, DataBaseException {
+    public List<Showroom> findAll(int limit, int offset) throws DAOException, DataBaseException {
         ConnectionWrapper con = transactionUtil.getConnection();
         return executor.performEntityListSelect(con, () -> {
             List<Showroom> list = new ArrayList<>();
             String sql = queryManager.getProperty("showroom.SelectAll");
             PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1, offset);
+            ps.setInt(2, limit);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(processShowroomRow(rs));
@@ -101,6 +106,21 @@ public class MySqlShowroomDao implements ShowroomDao {
                 showroom = processShowroomRow(rs);
             }
             return showroom;
+        });
+    }
+
+    @Override
+    public Integer getNumberOfRows() throws DAOException, DataBaseException{
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return rowsFounder.performEntitySelect(con, () -> {
+           Integer rows = null;
+           String sql = queryManager.getProperty("showroom.getNumberOfRows");
+           PreparedStatement ps = con.createPreparedStatement(sql);
+           ResultSet rs = ps.executeQuery();
+           while (rs.next()){
+               rows = rs.getInt("total");
+           }
+           return rows;
         });
     }
 

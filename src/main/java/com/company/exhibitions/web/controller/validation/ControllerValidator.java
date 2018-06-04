@@ -7,9 +7,8 @@ public abstract class ControllerValidator {
 
     private ControllerValidator next;
 
-    public ControllerValidator linkWith(ControllerValidator next){
+    public ControllerValidator (ControllerValidator next){
         this.next = next;
-        return next;
     }
 
     public abstract String defineAttribute(Map<String, String> map);

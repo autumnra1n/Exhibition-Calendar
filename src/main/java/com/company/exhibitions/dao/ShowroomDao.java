@@ -12,6 +12,7 @@ public interface ShowroomDao {
     void updateShowroom(Showroom showroom) throws DAOException, DataBaseException;
     void deleteShowroomById(int id) throws DAOException, DataBaseException;
     Showroom findShowroom(Showroom showroom) throws DAOException, DataBaseException;
-    List<Showroom> findAll() throws DAOException, DataBaseException;
+    List<Showroom> findAll(int limit, int offset) throws DAOException, DataBaseException;
     Showroom findShowroomById(int id) throws DAOException, DataBaseException;
+    Integer getNumberOfRows() throws DAOException, DataBaseException;
 }

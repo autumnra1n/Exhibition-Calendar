@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class ConnectionWrapper {
+
     private final Connection connection;
 
     public ConnectionWrapper(Connection connection){
@@ -15,12 +16,12 @@ public class ConnectionWrapper {
         return connection.prepareStatement(sql);
     }
 
-    Connection getConnection(){
+    public Connection getConnection(){
         return connection;
     }
 
     public void close() throws SQLException{
-        if(!connection.getAutoCommit()){
+        if(connection.getAutoCommit()){
                connection.close();
         }
     }

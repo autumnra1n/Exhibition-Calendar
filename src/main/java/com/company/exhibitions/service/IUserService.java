@@ -12,7 +12,9 @@ public interface IUserService {
     void updateUser(Map <String, String> parameters) throws ServiceException;
     void deleteUser(Map <String, String> parameters) throws ServiceException;
     User findAccount(Map <String, String> parameters) throws ServiceException;
-    List<User> findAll() throws ServiceException;
+    List<User> findAll(Map <String, String> parameters) throws ServiceException;
     User findUserById(Map <String, String> parameters) throws ServiceException;
     List<User> findUsersByRoleId(Map <String, String> parameters) throws ServiceException;
+    Integer getNumberOfRows() throws ServiceException;
+    Integer getNumberOfRowsByRoleId(Map <String, String> parameters) throws ServiceException;
 }

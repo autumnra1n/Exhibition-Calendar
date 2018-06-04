@@ -12,7 +12,9 @@ public interface IExpositionService {
     void updateExposition(Map <String, String> parameters) throws ServiceException;
     void deleteExposition(Map <String, String> parameters) throws ServiceException;
     Exposition findExposition(Map <String, String> parameters) throws ServiceException;
-    List<Exposition> findAll() throws ServiceException;
+    List<Exposition> findAll(Map <String, String> parameters) throws ServiceException;
     Exposition findExpositionById (Map <String, String> parameters) throws ServiceException;
     List<Exposition> findExpositionByShowroomId (Map <String, String> parameters) throws ServiceException;
+    Integer getNumberOfRows() throws ServiceException;
+    Integer getNumberOfRowsByShowroomId(Map <String, String> parameters) throws ServiceException;
 }

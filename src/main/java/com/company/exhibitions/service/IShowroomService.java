@@ -12,6 +12,7 @@ public interface IShowroomService {
     void updateShowroom(Map <String, String> parameters) throws ServiceException;
     void deleteShowroom(Map <String, String> parameters) throws ServiceException;
     Showroom findShowroom(Map <String, String> parameters) throws ServiceException;
-    List<Showroom> findAll() throws ServiceException;
+    List<Showroom> findAll(Map <String, String> parameters) throws ServiceException;
     Showroom findShowroomById (Map <String, String> parameters) throws ServiceException;
+    Integer getNumberOfRows()throws ServiceException;
 }

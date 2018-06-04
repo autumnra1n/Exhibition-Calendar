@@ -6,12 +6,12 @@ import com.company.exhibitions.dao.utils.QueryManager;
 import com.company.exhibitions.dao.utils.mysql.MySqlExecutor;
 import com.company.exhibitions.dao.utils.mysql.MySqlQueryManager;
 import com.company.exhibitions.dto.Exposition;
-import com.company.exhibitions.dto.Payment;
 import com.company.exhibitions.dto.Showroom;
 import com.company.exhibitions.exception.DAOException;
 import com.company.exhibitions.exception.DataBaseException;
 import com.company.exhibitions.transaction.ConnectionWrapper;
 import com.company.exhibitions.transaction.TransactionUtil;
+import com.company.exhibitions.utils.Mapper;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -20,8 +20,9 @@ import java.util.List;
 public class MySqlExpositionDao implements ExpositionDao {
 
     private final DaoExecutor<Exposition> executor = new MySqlExecutor<>();
+    private final DaoExecutor<Integer> rowsFounder = new MySqlExecutor<>();
     private final QueryManager queryManager = new MySqlQueryManager();
-    private final TransactionUtil transactionUtil = TransactionUtil.getInstance();
+    private final TransactionUtil transactionUtil = Mapper.getTransactionUtil();
 
     @Override
     public void insertExposition(Exposition exposition) throws DAOException, DataBaseException {
@@ -58,12 +59,14 @@ public class MySqlExpositionDao implements ExpositionDao {
     }
 
     @Override
-    public List<Exposition> findAll() throws DAOException, DataBaseException {
+    public List<Exposition> findAll(int limit, int offset) throws DAOException, DataBaseException {
         ConnectionWrapper con = transactionUtil.getConnection();
         return executor.performEntityListSelect(con, () -> {
             List<Exposition> list = new ArrayList<>();
             String sql = queryManager.getProperty("exposition.SelectAll");
             PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1, offset);
+            ps.setInt(2, limit);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(processExpositionRow(rs));
@@ -104,18 +107,52 @@ public class MySqlExpositionDao implements ExpositionDao {
         });
     }
 
-    public List<Exposition> findExpositionsByShowroomId(int id) throws DAOException, DataBaseException {
+    @Override
+    public List<Exposition> findExpositionsByShowroomId(int id, int limit, int offset) throws DAOException, DataBaseException {
         ConnectionWrapper con = transactionUtil.getConnection();
         return executor.performEntityListSelect(con, () -> {
             List<Exposition> list = new ArrayList<>();
             String sql = queryManager.getProperty("exposition.SelectExpositionsByShowroomId");
             PreparedStatement ps = con.createPreparedStatement(sql);
             ps.setInt(1, id);
+            ps.setInt(2, offset);
+            ps.setInt(3, limit);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(processExpositionRow(rs));
             }
             return list;
+        });
+    }
+
+    @Override
+    public Integer getNumberOfRows() throws DAOException, DataBaseException {
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return rowsFounder.performEntitySelect(con, () -> {
+            Integer rows = null;
+            String sql = queryManager.getProperty("exposition.getNumberOfRows");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                rows = rs.getInt("total");
+            }
+            return rows;
+        });
+    }
+
+    @Override
+    public Integer getNumberOfRowsByShowroomId(int id) throws DAOException, DataBaseException {
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return rowsFounder.performEntitySelect(con, () -> {
+            Integer rows = null;
+            String sql = queryManager.getProperty("exposition.getNumberOfRowsByShowroomId");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                rows = rs.getInt("total");
+            }
+            return rows;
         });
     }
 

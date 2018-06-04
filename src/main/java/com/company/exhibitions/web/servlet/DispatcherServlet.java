@@ -3,7 +3,7 @@ package com.company.exhibitions.web.servlet;
 import com.company.exhibitions.utils.Mapper;
 import com.company.exhibitions.web.command.Command;
 import com.company.exhibitions.web.controller.Controller;
-import com.company.exhibitions.web.controller.impl.*;
+import com.company.exhibitions.web.controller.validation.application.CredentialsValidator;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -28,19 +28,15 @@ public class DispatcherServlet extends HttpServlet {
 
     private void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        final ControllerFactory factory = Mapper.getControllerFactory();
-        Controller controller = factory.getExpositionController()
-                .linkWith(factory.getPaymentController())
-                .linkWith(factory.getRoleController())
-                .linkWith(factory.getShowroomController())
-                .linkWith(factory.getTicketController())
-                .linkWith(factory.getUserController())
-                .linkWith(factory.getApplicationController());
-
+        CredentialsValidator credentialsValidator = Mapper.getAdminCredentialsValidator();
+        Controller controller = Mapper.getControllerFactory().getControllerChain();
         Command command = controller.defineCommand(request.getParameter("command"));
-        String page = command.execute(request, response);
-        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(page);
-        dispatcher.forward(request, response);
+        if(credentialsValidator.validateCredentials(command, request)) {
+            String page = command.execute(request, response);
+            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(page);
+            dispatcher.forward(request, response);
+        }
+        else
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
 }

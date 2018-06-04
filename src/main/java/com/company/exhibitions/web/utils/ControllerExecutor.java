@@ -13,7 +13,7 @@ public class ControllerExecutor {
         try {
             controllerExecutable.execute();
         } catch (ServiceException e) {
-            LOGGER.error("Service exception occurred in" + MySqlExecutor.class.getName(), e);
+            LOGGER.error("Service exception occurred in " + MySqlExecutor.class.getName(), e);
         }
     }
 
@@ -21,7 +21,7 @@ public class ControllerExecutor {
         try {
             return attributeExecutable.execute();
         } catch (ServiceException e) {
-            LOGGER.error("Service exception occurred in" + MySqlExecutor.class.getName(), e);
+            LOGGER.error("Service exception occurred in " + MySqlExecutor.class.getName(), e);
             return null;
         }
     }

@@ -11,6 +11,10 @@ public class PasswordValidator extends ControllerValidator {
 
     private static final String PASSWORD_PATTERN = "^[a-z0-9_-]{3,64}$";
 
+    public PasswordValidator(ControllerValidator next) {
+        super(next);
+    }
+
     @Override
     public String defineAttribute(Map<String, String> map) {
         String password = map.get("password");

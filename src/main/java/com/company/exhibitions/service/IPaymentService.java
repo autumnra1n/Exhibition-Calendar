@@ -12,8 +12,10 @@ public interface IPaymentService {
     void updatePayment(Map <String, String> parameters) throws ServiceException;
     void deletePayment(Map <String, String> parameters) throws ServiceException;
     Payment findPayment(Map <String, String> parameters) throws ServiceException;
-    List<Payment> findAll() throws ServiceException;
+    List<Payment> findAll(Map <String, String> parameters) throws ServiceException;
     Payment findPaymentById (Map <String, String> parameters) throws ServiceException;
     Payment findPaymentByTicketId (Map <String, String> parameters) throws ServiceException;
     List<Payment> findPaymentByUserId(Map <String, String> parameters) throws ServiceException;
+    Integer getNumberOfRows() throws ServiceException;
+    Integer getNumberOfRowsByUserId(Map <String, String> parameters) throws ServiceException;
 }

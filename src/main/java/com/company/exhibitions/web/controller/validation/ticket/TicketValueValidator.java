@@ -6,6 +6,11 @@ import com.company.exhibitions.web.controller.validation.CustomRequestAttributes
 import java.util.Map;
 
 public class TicketValueValidator extends ControllerValidator {
+
+    public TicketValueValidator(ControllerValidator next) {
+        super(next);
+    }
+
     @Override
     public String defineAttribute(Map<String, String> map) {
         try {

@@ -12,9 +12,10 @@ public interface PaymentDao {
     void updatePayment(Payment payment) throws DAOException, DataBaseException;
     void deletePaymentById(int id) throws DAOException, DataBaseException;
     Payment findPayment(Payment payment) throws DAOException, DataBaseException;
-    List<Payment> findAll() throws DAOException, DataBaseException;
+    List<Payment> findAll(int limit, int offset) throws DAOException, DataBaseException;
     Payment findPaymentById(int id) throws DAOException, DataBaseException;
-    List<Payment> findPaymentsByUserId(int id) throws DAOException, DataBaseException;
+    List<Payment> findPaymentsByUserId(int id, int limit, int offset) throws DAOException, DataBaseException;
     Payment findPaymentByTicketId(int id) throws DAOException, DataBaseException;
-
+    Integer getNumberOfRows() throws DAOException, DataBaseException;
+    Integer getNumberOfRowsByUserId(int id) throws DAOException, DataBaseException;
 }

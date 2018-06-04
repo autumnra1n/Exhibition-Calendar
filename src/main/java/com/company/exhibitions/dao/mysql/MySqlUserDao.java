@@ -9,8 +9,10 @@ import com.company.exhibitions.exception.DAOException;
 import com.company.exhibitions.exception.DataBaseException;
 import com.company.exhibitions.dao.utils.mysql.MySqlExecutor;
 import com.company.exhibitions.dao.utils.mysql.MySqlQueryManager;
+import com.company.exhibitions.utils.Base64Encoder;
 import com.company.exhibitions.transaction.ConnectionWrapper;
 import com.company.exhibitions.transaction.TransactionUtil;
+import com.company.exhibitions.utils.Mapper;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,8 +23,10 @@ import java.util.List;
 public class MySqlUserDao implements UserDao {
 
     private final DaoExecutor<User> executor = new MySqlExecutor<>();
+    private final DaoExecutor<Integer> rowsFounder = new MySqlExecutor<>();
     private final QueryManager queryManager = new MySqlQueryManager();
-    private final TransactionUtil transactionUtil = TransactionUtil.getInstance();
+    private final TransactionUtil transactionUtil = Mapper.getTransactionUtil();
+    private final Base64Encoder base64Encoder = new Base64Encoder();
 
     @Override
     public void insertUser(User user) throws DAOException, DataBaseException {
@@ -75,12 +79,14 @@ public class MySqlUserDao implements UserDao {
     }
 
     @Override
-    public List<User> findAll() throws DAOException, DataBaseException {
+    public List<User> findAll(int limit, int offset) throws DAOException, DataBaseException {
         ConnectionWrapper con = transactionUtil.getConnection();
         return executor.performEntityListSelect(con, () -> {
             List<User> list = new ArrayList<>();
             String sql = queryManager.getProperty("user.SelectAll");
             PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1, offset);
+            ps.setInt(2, limit);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(processUserRow(rs));
@@ -106,18 +112,51 @@ public class MySqlUserDao implements UserDao {
     }
 
     @Override
-    public List<User> findUsersByRoleId(int id) throws DAOException, DataBaseException {
+    public List<User> findUsersByRoleId(int id, int limit, int offset) throws DAOException, DataBaseException {
         ConnectionWrapper con = transactionUtil.getConnection();
         return executor.performEntityListSelect(con, () -> {
             List<User> list = new ArrayList<>();
             String sql = queryManager.getProperty("user.SelectUserByRoleId");
             PreparedStatement ps = con.createPreparedStatement(sql);
             ps.setInt(1, id);
+            ps.setInt(2, offset);
+            ps.setInt(3, limit);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(processUserRow(rs));
             }
             return list;
+        });
+    }
+
+    @Override
+    public Integer getNumberOfRows() throws DAOException, DataBaseException {
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return rowsFounder.performEntitySelect(con, () -> {
+            Integer rows = null;
+            String sql = queryManager.getProperty("user.getNumberOfRows");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                rows = rs.getInt("total");
+            }
+            return rows;
+        });
+    }
+
+    @Override
+    public Integer getNumberOfRowsByRoleId(int id) throws DAOException, DataBaseException {
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return rowsFounder.performEntitySelect(con, () -> {
+            Integer rows = null;
+            String sql = queryManager.getProperty("user.getNumberOfRowsByRoleId");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                rows = rs.getInt("total");
+            }
+            return rows;
         });
     }
 
@@ -133,7 +172,7 @@ public class MySqlUserDao implements UserDao {
     private User processUserRow(ResultSet rs) throws SQLException {
         final int id = rs.getInt("user.id");
         String login = rs.getString("user.login");
-        String password = rs.getString("user.password");
+        String password = base64Encoder.decode(rs.getString("user.password"));
         String email = rs.getString("user.email");
         String firstName = rs.getString("user.firstName");
         String lastName = rs.getString("user.lastName");

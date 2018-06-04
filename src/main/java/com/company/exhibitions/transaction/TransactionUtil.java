@@ -3,17 +3,18 @@ package com.company.exhibitions.transaction;
 import com.company.exhibitions.connectionpool.ConnectionsPool;
 import com.company.exhibitions.exception.DataBaseException;
 
-import javax.naming.NamingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
 
 public class TransactionUtil {
 
-    private static final ThreadLocal<ConnectionWrapper> connections  = new ThreadLocal<>();
-    private static final TransactionUtil transactionUtil = new TransactionUtil();
+    private static final ThreadLocal<ConnectionWrapper> connections = new ThreadLocal<>();
+    private final ConnectionsPool connectionsPool;
 
-    private TransactionUtil(){}
+    public TransactionUtil() {
+        this.connectionsPool = new ConnectionsPool();
+    }
 
     public void beginTransaction() throws DataBaseException {
         ConnectionWrapper con = connections.get();
@@ -21,11 +22,11 @@ public class TransactionUtil {
             throw new DataBaseException();
         }
         try {
-            Connection connection = ConnectionsPool.getInstance().getConnection();
+            Connection connection = connectionsPool.getConnection();
             connection.setAutoCommit(false);
             con = new ConnectionWrapper(connection);
             connections.set(con);
-        }catch(NamingException | SQLException e){
+        }catch(SQLException e){
             throw new DataBaseException(e);
         }
     }
@@ -72,16 +73,12 @@ public class TransactionUtil {
             return con;
         }
         try {
-            Connection connection = ConnectionsPool.getInstance().getConnection();
+            Connection connection = connectionsPool.getConnection();
             connection.setAutoCommit(true);
             con = new ConnectionWrapper(connection);
             return con;
-        }catch(NamingException | SQLException e){
+        }catch(SQLException e){
                 throw new DataBaseException(e);
         }
-    }
-
-    public static TransactionUtil getInstance(){
-        return transactionUtil;
     }
 }

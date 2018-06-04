@@ -12,7 +12,11 @@ public interface ITicketService {
     void updateTicket(Map <String, String> parameters) throws ServiceException;
     void deleteTicket(Map <String, String> parameters) throws ServiceException;
     Ticket findTicket(Map <String, String> parameters) throws ServiceException;
-    List<Ticket> findAll() throws ServiceException;
+    List<Ticket> findAll(Map <String, String> parameters) throws ServiceException;
     Ticket findTicketById(Map <String, String> parameters) throws ServiceException;
     List<Ticket> findTicketsByExpositionId(Map <String, String> parameters) throws ServiceException;
+    Integer getNumberOfRows() throws ServiceException;
+    Integer getNumberOfRowsByExpositionId(Map <String, String> parameters) throws ServiceException;
+    void acquirePayment(Map<String, String> parameters, Ticket ticket);
+    void addTicketFields(Map<String, String> parameters, Ticket ticket);
 }

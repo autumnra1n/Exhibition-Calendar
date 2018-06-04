@@ -32,7 +32,6 @@ public class MySqlExecutor<T> implements DaoExecutor<T> {
         try {
             return ex.execute();
         } catch (SQLException e) {
-
             throw new DAOException(e);
         } finally {
             try {
@@ -44,7 +43,7 @@ public class MySqlExecutor<T> implements DaoExecutor<T> {
     }
 
     @Override
-    public List<T> performEntityListSelect(ConnectionWrapper con, MySqlEntityExecutable<List<T>> ex) throws DAOException, DataBaseException {
+    public List<T> performEntityListSelect(ConnectionWrapper con, MySqlEntityListExecutable<T> ex) throws DAOException, DataBaseException {
         try {
             return ex.execute();
         } catch (SQLException e) {

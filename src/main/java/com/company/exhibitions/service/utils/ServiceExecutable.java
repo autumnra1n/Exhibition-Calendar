@@ -6,5 +6,4 @@ import com.company.exhibitions.exception.DataBaseException;
 public interface ServiceExecutable {
 
     void execute() throws DataBaseException, DAOException;
-
 }

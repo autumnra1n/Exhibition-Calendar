@@ -25,8 +25,11 @@
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>3.6.1</version>
                 <configuration>
-                    <propertyFile>liquibase/liquibase.properties</propertyFile>
-                    <changeLogFile>liquibase/db-changelog-master.xml</changeLogFile>
+                    <changeLogFile>src/main/resources/liquibase/db-changelog-master.xml</changeLogFile>
+                    <driver>com.mysql.jdbc.Driver</driver>
+                    <url>jdbc:mysql://localhost:3306/exhibitions?createDatabaseIfNotExist=true</url>
+                    <username>root</username>
+                    <password>c1a2t3r4u5n6</password>
                 </configuration>
                 <executions>
                   <execution>
@@ -37,14 +40,14 @@
                   </execution>
                 </executions>
             </plugin>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.tomcat.maven</groupId>-->
-                <!--<artifactId>tomcat7-maven-plugin</artifactId>-->
-                <!--<version>2.2</version>-->
-                <!--<configuration>-->
-                    <!--<path>exhibitions</path>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.0-beta-1</version>
+                <configuration>
+                    <warSourceDirectory>${basedir}/target/web</warSourceDirectory>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -75,16 +78,9 @@
             <version>2.11.0</version>
         </dependency>
         <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>1.7.4</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
-            <version>1.7.4</version>
-            <scope>test</scope>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.0</version>
         </dependency>
     </dependencies>
 

@@ -11,6 +11,10 @@ public class EmailValidator extends ControllerValidator {
 
     private static final String EMAIL_PATTERN = "^(\\S+)@(\\S+)\\.(\\S+)$";
 
+    public EmailValidator(ControllerValidator next) {
+        super(next);
+    }
+
     @Override
     public String defineAttribute(Map<String, String> map) {
         String email = map.get("email");

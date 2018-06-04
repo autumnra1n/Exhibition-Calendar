@@ -10,6 +10,7 @@ import com.company.exhibitions.dao.utils.mysql.MySqlExecutor;
 import com.company.exhibitions.dao.utils.mysql.MySqlQueryManager;
 import com.company.exhibitions.transaction.ConnectionWrapper;
 import com.company.exhibitions.transaction.TransactionUtil;
+import com.company.exhibitions.utils.Mapper;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -18,8 +19,9 @@ import java.util.List;
 public class MySqlRoleDao implements RoleDao {
 
     private final DaoExecutor<Role> executor = new MySqlExecutor<>();
+    private final DaoExecutor<Integer> rowsFounder = new MySqlExecutor<>();
     private final QueryManager queryManager = new MySqlQueryManager();
-    private final TransactionUtil transactionUtil = TransactionUtil.getInstance();
+    private final TransactionUtil transactionUtil = Mapper.getTransactionUtil();
 
     @Override
     public void insertRole(Role role) throws DAOException, DataBaseException {
@@ -72,12 +74,14 @@ public class MySqlRoleDao implements RoleDao {
     }
 
     @Override
-    public List<Role> findAll() throws DAOException, DataBaseException {
+    public List<Role> findAll(int limit, int offset) throws DAOException, DataBaseException {
         ConnectionWrapper con = transactionUtil.getConnection();
         return executor.performEntityListSelect(con, () -> {
             List<Role> list = new ArrayList<>();
             String sql = queryManager.getProperty("role.SelectAll");
             PreparedStatement ps = con.createPreparedStatement(sql);
+            ps.setInt(1, offset);
+            ps.setInt(2, limit);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(processRoleRow(rs));
@@ -99,6 +103,21 @@ public class MySqlRoleDao implements RoleDao {
                 role = processRoleRow(rs);
             }
             return role;
+        });
+    }
+
+    @Override
+    public Integer getNumberOfRows() throws DAOException, DataBaseException {
+        ConnectionWrapper con = transactionUtil.getConnection();
+        return rowsFounder.performEntitySelect(con, () -> {
+            Integer rows = null;
+            String sql = queryManager.getProperty("role.getNumberOfRows");
+            PreparedStatement ps = con.createPreparedStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                rows = rs.getInt("total");
+            }
+            return rows;
         });
     }
 
